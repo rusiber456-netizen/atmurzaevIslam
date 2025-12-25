@@ -1,0 +1,1543 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Настройки - ЧИП: Система управления сервисным центром</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <link rel="stylesheet" href="../css/responsive.css">
+    <style>
+        .settings-container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: var(--spacing-xl);
+        }
+        
+        .settings-nav {
+            background-color: var(--color-bg-card);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-md);
+            height: fit-content;
+        }
+        
+        .settings-nav-item {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            padding: var(--spacing-md);
+            color: var(--color-text-light);
+            text-decoration: none;
+            border-radius: var(--radius-md);
+            transition: all var(--transition-fast);
+            margin-bottom: var(--spacing-xs);
+        }
+        
+        .settings-nav-item:hover {
+            background-color: var(--color-bg);
+            color: var(--color-text);
+        }
+        
+        .settings-nav-item.active {
+            background-color: rgba(30, 64, 175, 0.1);
+            color: var(--color-primary);
+            font-weight: 500;
+        }
+        
+        .settings-nav-item i {
+            width: 20px;
+            text-align: center;
+        }
+        
+        .settings-content {
+            background-color: var(--color-bg-card);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-xl);
+        }
+        
+        .settings-section {
+            display: none;
+        }
+        
+        .settings-section.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .settings-section-title {
+            font-size: var(--font-size-xl);
+            font-weight: 600;
+            margin-bottom: var(--spacing-lg);
+            color: var(--color-text);
+            padding-bottom: var(--spacing-md);
+            border-bottom: 1px solid var(--color-border);
+        }
+        
+        .settings-form {
+            max-width: 600px;
+        }
+        
+        .settings-group {
+            margin-bottom: var(--spacing-xl);
+            padding-bottom: var(--spacing-lg);
+            border-bottom: 1px solid var(--color-border);
+        }
+        
+        .settings-group-title {
+            font-size: var(--font-size-lg);
+            font-weight: 600;
+            margin-bottom: var(--spacing-lg);
+            color: var(--color-text);
+        }
+        
+        .color-preview {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--color-border);
+            margin-right: var(--spacing-md);
+            cursor: pointer;
+        }
+        
+        .theme-option {
+            display: flex;
+            align-items: center;
+            padding: var(--spacing-md);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--spacing-md);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        
+        .theme-option:hover {
+            border-color: var(--color-primary);
+        }
+        
+        .theme-option.active {
+            border-color: var(--color-primary);
+            background-color: rgba(30, 64, 175, 0.05);
+        }
+        
+        .theme-preview {
+            width: 60px;
+            height: 40px;
+            border-radius: var(--radius-sm);
+            margin-right: var(--spacing-md);
+            border: 1px solid var(--color-border);
+        }
+        
+        .backup-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-md);
+        }
+        
+        .backup-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-md);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+        }
+        
+        .backup-info {
+            flex: 1;
+        }
+        
+        .backup-name {
+            font-weight: 500;
+            margin-bottom: var(--spacing-xs);
+        }
+        
+        .backup-meta {
+            font-size: var(--font-size-sm);
+            color: var(--color-text-light);
+        }
+        
+        .danger-zone {
+            background-color: rgba(239, 68, 68, 0.05);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-lg);
+            margin-top: var(--spacing-xl);
+        }
+        
+        .danger-title {
+            color: var(--color-danger);
+            font-weight: 600;
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .danger-text {
+            color: var(--color-text-light);
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Боковая панель навигации -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">Ч</div>
+                <div>
+                    <div class="logo-text">ЧИП: ServiceTrack</div>
+                    <div class="logo-subtext">Управление сервисным центром</div>
+                </div>
+            </div>
+            
+            <nav class="nav-menu">
+                <a href="../index.html" class="nav-item">
+                    <i class="fas fa-home"></i>
+                    <span>Дашборд</span>
+                </a>
+                <a href="orders.html" class="nav-item">
+                    <i class="fas fa-clipboard-list"></i>
+                    <span>Заявки</span>
+                </a>
+                <a href="clients.html" class="nav-item active">
+                    <i class="fas fa-users"></i>
+                    <span>Клиенты</span>
+                </a>
+                <a href="employees.html" class="nav-item">
+                    <i class="fas fa-user-cog"></i>
+                    <span>Мастера</span>
+                </a>
+                <a href="services.html" class="nav-item">
+                    <i class="fas fa-cogs"></i>
+                    <span>Услуги и запчасти</span>
+                </a>
+                <a href="reports.html" class="nav-item">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Отчёты</span>
+                </a>
+                <a href="settings.html" class="nav-item">
+                    <i class="fas fa-cog"></i>
+                    <span>Настройки</span>
+                </a>
+            </nav>
+
+            
+            <div class="sidebar-footer">
+                <div class="user-avatar">ИП</div>
+                <div class="user-info">
+                    <div class="user-name">Иван Петров</div>
+                    <div class="user-role">Администратор</div>
+                </div>
+                <a href="#" class="action-btn" data-action="logout" title="Выйти">
+                    <i class="fas fa-sign-out-alt"></i>
+                </a>
+            </div>
+        </aside>
+        
+        <!-- Основное содержимое -->
+        <main class="main-content">
+            <!-- Верхняя панель -->
+            <header class="topbar">
+                <div style="display: flex; align-items: center; gap: var(--spacing-md);">
+                    <button class="mobile-menu-toggle" id="menuToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1 class="page-title">Настройки системы</h1>
+                </div>
+                
+                <div class="topbar-actions">
+                    <button class="btn btn-primary" id="saveSettings">
+                        <i class="fas fa-save"></i>
+                        <span>Сохранить изменения</span>
+                    </button>
+                </div>
+            </header>
+            
+            <!-- Контейнер настроек -->
+            <div class="settings-container">
+                <!-- Левая панель навигации -->
+                <nav class="settings-nav" data-permission="settings.view">
+                    <a href="#general" class="settings-nav-item active" data-section="general">
+                        <i class="fas fa-cog"></i>
+                        <span>Основные</span>
+                    </a>
+                    <a href="#appearance" class="settings-nav-item" data-section="appearance" data-permission="settings.appearance">
+                        <i class="fas fa-palette"></i>
+                        <span>Внешний вид</span>
+                    </a>
+                    <a href="#notifications" class="settings-nav-item" data-section="notifications" data-permission="settings.notifications">
+                        <i class="fas fa-bell"></i>
+                        <span>Уведомления</span>
+                    </a>
+                    <a href="#users" class="settings-nav-item" data-section="users" data-permission="users.manage">
+                        <i class="fas fa-users-cog"></i>
+                        <span>Пользователи</span>
+                    </a>
+                    <a href="#company" class="settings-nav-item" data-section="company" data-permission="settings.company">
+                        <i class="fas fa-building"></i>
+                        <span>Компания</span>
+                    </a>
+                    <a href="#services" class="settings-nav-item" data-section="services" data-permission="settings.services">
+                        <i class="fas fa-tools"></i>
+                        <span>Услуги и тарифы</span>
+                    </a>
+                    <a href="#backup" class="settings-nav-item" data-section="backup" data-permission="settings.backup">
+                        <i class="fas fa-database"></i>
+                        <span>Резервные копии</span>
+                    </a>
+                    <a href="#security" class="settings-nav-item" data-section="security" data-permission="settings.security">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Безопасность</span>
+                    </a>
+                    <a href="#system" class="settings-nav-item" data-section="system" data-permission="settings.system">
+                        <i class="fas fa-server"></i>
+                        <span>Система</span>
+                    </a>
+                </nav>
+                
+                <!-- Правая панель с содержимым -->
+                <div class="settings-content">
+                    <!-- Раздел: Основные настройки -->
+                    <section id="general-section" class="settings-section active">
+                        <h2 class="settings-section-title">
+                            <i class="fas fa-cog"></i>
+                            Основные настройки
+                        </h2>
+                        
+                        <form class="settings-form" id="generalSettingsForm">
+                            <div class="settings-group">
+                                <h3 class="settings-group-title">Основная информация</h3>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Название системы</label>
+                                    <input type="text" class="form-control" name="systemName" 
+                                           value="ЧИП: ServiceTrack" placeholder="Введите название системы">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Короткое описание</label>
+                                    <textarea class="form-control" name="systemDescription" rows="2" 
+                                              placeholder="Краткое описание системы">Система управления сервисным центром ООО "ЧИП"</textarea>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Версия системы</label>
+                                    <input type="text" class="form-control" name="systemVersion" 
+                                           value="1.0.0" readonly>
+                                    <div class="form-text">Текущая версия системы</div>
+                                </div>
+                            </div>
+                            
+                            <div class="settings-group">
+                                <h3 class="settings-group-title">Рабочее время</h3>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="form-label">Начало рабочего дня</label>
+                                            <input type="time" class="form-control" name="workStart" 
+                                                   value="09:00">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="form-label">Окончание рабочего дня</label>
+                                            <input type="time" class="form-control" name="workEnd" 
+                                                   value="18:00">
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Рабочие дни</label>
+                                    <div class="row">
+                                        <div class="col-md-3 col-sm-4 col-6">
+                                            <label class="checkbox">
+                                                <input type="checkbox" name="workDays" value="1" checked>
+                                                <span class="checkbox-text">Понедельник</span>
+                                            </label>
+                                        </div>
+                                        <div class="col-md-3 col-sm-4 col-6">
+                                            <label class="checkbox">
+                                                <input type="checkbox" name="workDays" value="2" checked>
+                                                <span class="checkbox-text">Вторник</span>
+                                            </label>
+                                        </div>
+                                        <div class="col-md-3 col-sm-4 col-6">
+                                            <label class="checkbox">
+                                                <input type="checkbox" name="workDays" value="3" checked>
+                                                <span class="checkbox-text">Среда</span>
+                                            </label>
+                                        </div>
+                                        <div class="col-md-3 col-sm-4 col-6">
+                                            <label class="checkbox">
+                                                <input type="checkbox" name="workDays" value="4" checked>
+                                                <span class="checkbox-text">Четверг</span>
+                                            </label>
+                                        </div>
+                                        <div class="col-md-3 col-sm-4 col-6">
+                                            <label class="checkbox">
+                                                <input type="checkbox" name="workDays" value="5" checked>
+                                                <span class="checkbox-text">Пятница</span>
+                                            </label>
+                                        </div>
+                                        <div class="col-md-3 col-sm-4 col-6">
+                                            <label class="checkbox">
+                                                <input type="checkbox" name="workDays" value="6">
+                                                <span class="checkbox-text">Суббота</span>
+                                            </label>
+                                        </div>
+                                        <div class="col-md-3 col-sm-4 col-6">
+                                            <label class="checkbox">
+                                                <input type="checkbox" name="workDays" value="0">
+                                                <span class="checkbox-text">Воскресенье</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="settings-group">
+                                <h3 class="settings-group-title">Настройки заказов</h3>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Автоматическая нумерация заказов</label>
+                                    <label class="checkbox">
+                                        <input type="checkbox" name="autoOrderNumber" checked>
+                                        <span class="checkbox-text">Включить автоматическую нумерацию</span>
+                                    </label>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Префикс номера заказа</label>
+                                    <input type="text" class="form-control" name="orderPrefix" 
+                                           value="CH" maxlength="5" placeholder="Например: CH">
+                                    <div class="form-text">Будет добавлен перед номером заказа</div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Начальный номер заказа</label>
+                                    <input type="number" class="form-control" name="orderStartNumber" 
+                                           value="1001" min="1">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Стандартный срок ремонта (дней)</label>
+                                    <input type="number" class="form-control" name="defaultRepairDays" 
+                                           value="3" min="1" max="30">
+                                    <div class="form-text">Будет использоваться при создании заказа</div>
+                                </div>
+                            </div>
+                            
+                            <div class="settings-group">
+                                <h3 class="settings-group-title">Уведомления и напоминания</h3>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Напоминание о готовности заказа</label>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <label class="form-label">За сколько часов</label>
+                                            <input type="number" class="form-control" name="reminderHours" 
+                                                   value="24" min="1" max="168">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Способ уведомления</label>
+                                            <select class="form-control" name="reminderType">
+                                                <option value="both">В системе и по SMS</option>
+                                                <option value="system">Только в системе</option>
+                                                <option value="sms">Только по SMS</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </section>
+                    
+                    <!-- Раздел: Внешний вид -->
+                    <section id="appearance-section" class="settings-section">
+                        <h2 class="settings-section-title">
+                            <i class="fas fa-palette"></i>
+                            Внешний вид системы
+                        </h2>
+                        
+                        <form class="settings-form" id="appearanceSettingsForm">
+                            <div class="settings-group">
+                                <h3 class="settings-group-title">Цветовая тема</h3>
+                                
+                                <div class="theme-options">
+                                    <div class="theme-option active" data-theme="light">
+                                        <div class="theme-preview" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);"></div>
+                                        <div>
+                                            <div class="font-weight-500">Светлая тема</div>
+                                            <div class="text-muted small">Стандартная светлая тема</div>
+                                        </div>
+                                        <div class="ml-auto">
+                                            <i class="fas fa-check text-primary"></i>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="theme-option" data-theme="dark">
+                                        <div class="theme-preview" style="background: linear-gradient(135deg, #1f2937 0%, #111827 100%);"></div>
+                                        <div>
+                                            <div class="font-weight-500">Тёмная тема</div>
+                                            <div class="text-muted small">Тёмная тема для работы в вечернее время</div>
+                                        </div>
+                                        <div class="ml-auto">
+                                            <i class="fas fa-check text-primary d-none"></i>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="theme-option" data-theme="auto">
+                                        <div class="theme-preview" style="background: linear-gradient(90deg, #f8f9fa 0%, #1f2937 50%);"></div>
+                                        <div>
+                                            <div class="font-weight-500">Автоматическая</div>
+                                            <div class="text-muted small">Определяется системными настройками</div>
+                                        </div>
+                                        <div class="ml-auto">
+                                            <i class="fas fa-check text-primary d-none"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="settings-group">
+                                <h3 class="settings-group-title">Основные цвета</h3>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="form-label">Основной цвет</label>
+                                            <div class="d-flex align-items-center">
+                                                <div class="color-preview" id="primaryColorPreview" 
+                                                     style="background-color: #1E40AF;"></div>
+                                                <input type="color" class="form-control" id="primaryColor" 
+                                                       value="#1E40AF" style="width: 60px; height: 40px;">
+                                                <input type="text" class="form-control ml-2" id="primaryColorHex" 
+                                                       value="#1E40AF" style="width: 100px;">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="form-label">Цвет успеха</label>
+                                            <div class="d-flex align-items-center">
+                                                <div class="color-preview" id="successColorPreview" 
+                                                     style="background-color: #10B981;"></div>
+                                                <input type="color" class="form-control" id="successColor" 
+                                                       value="#10B981" style="width: 60px; height: 40px;">
+                                                <input type="text" class="form-control ml-2" id="successColorHex" 
+                                                       value="#10B981" style="width: 100px;">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="settings-group">
+                                <h3 class="settings-group-title">Оформление интерфейса</h3>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Скругление углов</label>
+                                    <select class="form-control" name="borderRadius">
+                                        <option value="sm">Маленькое</option>
+                                        <option value="md" selected>Среднее</option>
+                                        <option value="lg">Большое</option>
+                                        <option value="xl">Очень большое</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Плотность интерфейса</label>
+                                    <select class="form-control" name="density">
+                                        <option value="compact">Компактная</option>
+                                        <option value="normal" selected>Нормальная</option>
+                                        <option value="comfortable">Комфортная</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Анимации</label>
+                                    <label class="checkbox">
+                                        <input type="checkbox" name="animations" checked>
+                                        <span class="checkbox-text">Включить плавные анимации</span>
+                                    </label>
+                                    <div class="form-text">Влияет на производительность на слабых устройствах</div>
+                                </div>
+                            </div>
+                        </form>
+                    </section>
+                    
+                    <!-- Раздел: Уведомления -->
+                    <section id="notifications-section" class="settings-section">
+                        <h2 class="settings-section-title">
+                            <i class="fas fa-bell"></i>
+                            Настройки уведомлений
+                        </h2>
+                        
+                        <form class="settings-form" id="notificationsSettingsForm">
+                            <div class="settings-group">
+                                <h3 class="settings-group-title">Типы уведомлений</h3>
+                                
+                                <div class="form-group">
+                                    <label class="checkbox">
+                                        <input type="checkbox" name="notifyNewOrder" checked>
+                                        <span class="checkbox-text">Новые заказы</span>
+                                    </label>
+                                    <div class="form-text">Уведомлять при создании нового заказа</div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="checkbox">
+                                        <input type="checkbox" name="notifyStatusChange" checked>
+                                        <span class="checkbox-text">Изменение статуса заказа</span>
+                                    </label>
+                                    <div class="form-text">Уведомлять при изменении статуса заказа</div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="checkbox">
+                                        <input type="checkbox" name="notifyReady" checked>
+                                        <span class="checkbox-text">Заказы готовы к выдаче</span>
+                                    </label>
+                                    <div class="form-text">Уведомлять, когда заказ готов к выдаче</div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="checkbox">
+                                        <input type="checkbox" name="notifyOverdue" checked>
+                                        <span class="checkbox-text">Просроченные заказы</span>
+                                    </label>
+                                    <div class="form-text">Уведомлять о просроченных заказах</div>
+                                </div>
+                            </div>
+                            
+                            <div class="settings-group">
+                                <h3 class="settings-group-title">Способы получения</h3>
+                                
+                                <div class="form-group">
+                                    <label class="checkbox">
+                                        <input type="checkbox" name="notifyInApp" checked>
+                                        <span class="checkbox-text">Внутрисистемные уведомления</span>
+                                    </label>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="checkbox">
+                                        <input type="checkbox" name="notifyEmail">
+                                        <span class="checkbox-text">Email уведомления</span>
+                                    </label>
+                                    <div class="form-text">Требуется настройка SMTP сервера</div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="checkbox">
+                                        <input type="checkbox" name="notifySMS">
+                                        <span class="checkbox-text">SMS уведомления</span>
+                                    </label>
+                                    <div class="form-text">Требуется подключение SMS шлюза</div>
+                                </div>
+                            </div>
+                            
+                            <div class="settings-group">
+                                <h3 class="settings-group-title">Расписание уведомлений</h3>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Рабочее время для уведомлений</label>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <input type="time" class="form-control" name="notifyStart" 
+                                                   value="09:00">
+                                            <div class="form-text">Начало</div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <input type="time" class="form-control" name="notifyEnd" 
+                                                   value="20:00">
+                                            <div class="form-text">Окончание</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Интервал проверки (минуты)</label>
+                                    <input type="number" class="form-control" name="notifyInterval" 
+                                           value="15" min="1" max="60">
+                                    <div class="form-text">Как часто проверять новые события</div>
+                                </div>
+                            </div>
+                        </form>
+                    </section>
+                    
+                    <!-- Раздел: Пользователи -->
+                    <section id="users-section" class="settings-section">
+                        <h2 class="settings-section-title">
+                            <i class="fas fa-users-cog"></i>
+                            Управление пользователями
+                        </h2>
+                        
+                        <div class="settings-group">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h3 class="settings-group-title mb-0">Список пользователей</h3>
+                                <button class="btn btn-primary" id="addUserBtn">
+                                    <i class="fas fa-user-plus"></i>
+                                    Добавить пользователя
+                                </button>
+                            </div>
+                            
+                            <div class="table-responsive">
+                                <table class="table" id="usersTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Пользователь</th>
+                                            <th>Роль</th>
+                                            <th>Email</th>
+                                            <th>Последний вход</th>
+                                            <th>Статус</th>
+                                            <th>Действия</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="usersTableBody">
+                                        <!-- Данные загружаются через JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <div class="settings-group">
+                            <h3 class="settings-group-title">Роли и права доступа</h3>
+                            
+                            <div class="table-responsive">
+                                <table class="table" id="rolesTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Роль</th>
+                                            <th>Описание</th>
+                                            <th>Пользователей</th>
+                                            <th>Ключевые права</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                                <span class="badge badge-primary">Администратор</span>
+                                            </td>
+                                            <td>Полный доступ ко всем функциям системы</td>
+                                            <td>1</td>
+                                            <td>Все права</td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <span class="badge badge-info">Мастер</span>
+                                            </td>
+                                            <td>Работа с заказами, изменение статусов</td>
+                                            <td>2</td>
+                                            <td>Заказы, отчёты</td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <span class="badge badge-warning">Бухгалтер</span>
+                                            </td>
+                                            <td>Финансовые отчёты, учёт операций</td>
+                                            <td>1</td>
+                                            <td>Отчёты, клиенты</td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <span class="badge badge-success">Менеджер</span>
+                                            </td>
+                                            <td>Управление заказами и клиентами</td>
+                                            <td>1</td>
+                                            <td>Заказы, клиенты, услуги</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </section>
+                    
+                    <!-- Раздел: Компания -->
+                    <section id="company-section" class="settings-section">
+                        <h2 class="settings-section-title">
+                            <i class="fas fa-building"></i>
+                            Информация о компании
+                        </h2>
+                        
+                        <form class="settings-form" id="companySettingsForm">
+                            <div class="settings-group">
+                                <h3 class="settings-group-title">Основная информация</h3>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Название компании</label>
+                                    <input type="text" class="form-control" name="companyName" 
+                                           value='ООО "ЧИП"' placeholder="Введите название компании">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Юридический адрес</label>
+                                    <textarea class="form-control" name="legalAddress" rows="2">Кабардино-Балкарская Республика, г. Нальчик</textarea>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Фактический адрес</label>
+                                    <textarea class="form-control" name="actualAddress" rows="2">Кабардино-Балкарская Республика, г. Нальчик</textarea>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="form-label">ИНН</label>
+                                            <input type="text" class="form-control" name="inn" 
+                                                   value="1234567890" maxlength="12">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="form-label">КПП</label>
+                                            <input type="text" class="form-control" name="kpp" 
+                                                   value="123456789" maxlength="9">
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">ОГРН</label>
+                                    <input type="text" class="form-control" name="ogrn" 
+                                           value="1234567890123" maxlength="13">
+                                </div>
+                            </div>
+                            
+                            <div class="settings-group">
+                                <h3 class="settings-group-title">Контактная информация</h3>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Телефон</label>
+                                    <input type="tel" class="form-control" name="companyPhone" 
+                                           value="+7 (999) 123-45-67" placeholder="+7 (XXX) XXX-XX-XX">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Email</label>
+                                    <input type="email" class="form-control" name="companyEmail" 
+                                           value="info@chip-service.ru" placeholder="info@example.com">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Веб-сайт</label>
+                                    <input type="url" class="form-control" name="companyWebsite" 
+                                           value="https://chip-service.ru" placeholder="https://example.com">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Режим работы</label>
+                                    <textarea class="form-control" name="workHours" rows="2">Пн-Пт: 9:00-18:00, Сб: 10:00-16:00, Вс: выходной</textarea>
+                                </div>
+                            </div>
+                            
+                            <div class="settings-group">
+                                <h3 class="settings-group-title">Банковские реквизиты</h3>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Расчётный счёт</label>
+                                    <input type="text" class="form-control" name="bankAccount" 
+                                           value="40702810123456789012" maxlength="20">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Банк</label>
+                                    <input type="text" class="form-control" name="bankName" 
+                                           value='ПАО "Сбербанк"' placeholder="Название банка">
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="form-label">БИК</label>
+                                            <input type="text" class="form-control" name="bik" 
+                                                   value="044525225" maxlength="9">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="form-label">Корр. счёт</label>
+                                            <input type="text" class="form-control" name="corrAccount" 
+                                                   value="30101810400000000225" maxlength="20">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </section>
+                    
+                    <!-- Раздел: Услуги и тарифы -->
+                    <section id="services-section" class="settings-section">
+                        <h2 class="settings-section-title">
+                            <i class="fas fa-tools"></i>
+                            Услуги и тарифы
+                        </h2>
+                        <p>Раздел в разработке...</p>
+                    </section>
+                    
+                    <!-- Раздел: Резервные копии -->
+                    <section id="backup-section" class="settings-section">
+                        <h2 class="settings-section-title">
+                            <i class="fas fa-database"></i>
+                            Резервные копии
+                        </h2>
+                        <p>Раздел в разработке...</p>
+                    </section>
+                    
+                    <!-- Раздел: Безопасность -->
+                    <section id="security-section" class="settings-section">
+                        <h2 class="settings-section-title">
+                            <i class="fas fa-shield-alt"></i>
+                            Безопасность
+                        </h2>
+                        <p>Раздел в разработке...</p>
+                    </section>
+                    
+                    <!-- Раздел: Система -->
+                    <section id="system-section" class="settings-section">
+                        <h2 class="settings-section-title">
+                            <i class="fas fa-server"></i>
+                            Системная информация
+                        </h2>
+                        
+                        <div class="settings-group">
+                            <h3 class="settings-group-title">Информация о системе</h3>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label">Версия системы</label>
+                                        <div class="form-control-static">1.0.0</div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label class="form-label">Дата установки</label>
+                                        <div class="form-control-static">15.01.2025</div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label class="form-label">Последнее обновление</label>
+                                        <div class="form-control-static">26.12.2025</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label">Количество заказов</label>
+                                        <div class="form-control-static">24</div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label class="form-label">Количество клиентов</label>
+                                        <div class="form-control-static">15</div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label class="form-label">Количество пользователей</label>
+                                        <div class="form-control-static">5</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="settings-group">
+                            <h3 class="settings-group-title">Логи системы</h3>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Уровень логирования</label>
+                                <select class="form-control" name="logLevel">
+                                    <option value="error">Только ошибки</option>
+                                    <option value="warn">Предупреждения и ошибки</option>
+                                    <option value="info" selected>Информация, предупреждения и ошибки</option>
+                                    <option value="debug">Все события</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Хранить логи (дней)</label>
+                                <input type="number" class="form-control" name="logRetention" 
+                                       value="30" min="1" max="365">
+                                <div class="form-text">Автоматическое удаление старых логов</div>
+                            </div>
+                            
+                            <button class="btn btn-secondary">
+                                <i class="fas fa-download"></i>
+                                Скачать логи системы
+                            </button>
+                        </div>
+                        
+                        <div class="danger-zone">
+                            <h3 class="danger-title">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                Опасная зона
+                            </h3>
+                            
+                            <p class="danger-text">
+                                Эти действия могут привести к потере данных. Выполняйте их с осторожностью.
+                            </p>
+                            
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <button class="btn btn-outline-danger w-100" id="clearCacheBtn">
+                                        <i class="fas fa-broom"></i>
+                                        Очистить кэш
+                                    </button>
+                                </div>
+                                
+                                <div class="col-md-4">
+                                    <button class="btn btn-outline-danger w-100" id="resetSettingsBtn">
+                                        <i class="fas fa-undo"></i>
+                                        Сбросить настройки
+                                    </button>
+                                </div>
+                                
+                                <div class="col-md-4">
+                                    <button class="btn btn-danger w-100" id="reinstallSystemBtn">
+                                        <i class="fas fa-trash"></i>
+                                        Переустановить систему
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Модальное окно добавления пользователя -->
+    <div class="modal" id="addUserModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Добавление пользователя</h3>
+                <button class="modal-close" data-modal="addUserModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="addUserForm">
+                    <div class="form-group">
+                        <label class="form-label">ФИО</label>
+                        <input type="text" class="form-control" name="name" required 
+                               placeholder="Иванов Иван Иванович">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Имя пользователя</label>
+                        <input type="text" class="form-control" name="username" required 
+                               placeholder="ivanov">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" name="email" required 
+                               placeholder="ivanov@example.com">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Пароль</label>
+                        <input type="password" class="form-control" name="password" required 
+                               placeholder="Введите пароль">
+                        <div class="form-text" id="passwordStrength"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Подтверждение пароля</label>
+                        <input type="password" class="form-control" name="confirmPassword" required 
+                               placeholder="Повторите пароль">
+                        <div class="form-text d-none text-danger" id="passwordMismatch">
+                            Пароли не совпадают
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Роль</label>
+                        <select class="form-control" name="role" required>
+                            <option value="">Выберите роль</option>
+                            <option value="admin">Администратор</option>
+                            <option value="master">Мастер</option>
+                            <option value="accountant">Бухгалтер</option>
+                            <option value="manager">Менеджер</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Телефон</label>
+                        <input type="tel" class="form-control" name="phone" 
+                               placeholder="+7 (999) 123-45-67">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Отдел</label>
+                        <input type="text" class="form-control" name="department" 
+                               placeholder="Сервисный центр">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-modal="addUserModal">Отмена</button>
+                <button type="submit" form="addUserForm" class="btn btn-primary">Добавить пользователя</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/main.js"></script>
+  
+    <script>
+        // Инициализация страницы настроек
+        document.addEventListener('DOMContentLoaded', function() {
+            initSettingsPage();
+        });
+        
+        function initSettingsPage() {
+            // Навигация по разделам настроек
+            const navItems = document.querySelectorAll('.settings-nav-item');
+            const sections = document.querySelectorAll('.settings-section');
+            
+            navItems.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Удаляем активный класс у всех элементов
+                    navItems.forEach(i => i.classList.remove('active'));
+                    sections.forEach(s => s.classList.remove('active'));
+                    
+                    // Добавляем активный класс текущему элементу
+                    this.classList.add('active');
+                    
+                    // Показываем соответствующий раздел
+                    const sectionId = this.getAttribute('data-section');
+                    const section = document.getElementById(`${sectionId}-section`);
+                    if (section) {
+                        section.classList.add('active');
+                    }
+                });
+            });
+            
+            // Сохранение настроек
+            const saveBtn = document.getElementById('saveSettings');
+            if (saveBtn) {
+                saveBtn.addEventListener('click', function() {
+                    saveAllSettings();
+                });
+            }
+            
+            // Управление темами
+            const themeOptions = document.querySelectorAll('.theme-option');
+            themeOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    themeOptions.forEach(o => {
+                        o.classList.remove('active');
+                        o.querySelector('.fa-check').classList.add('d-none');
+                    });
+                    
+                    this.classList.add('active');
+                    this.querySelector('.fa-check').classList.remove('d-none');
+                    
+                    const theme = this.getAttribute('data-theme');
+                    applyTheme(theme);
+                });
+            });
+            
+            // Работа с цветами
+            setupColorPickers();
+            
+            // Управление пользователями
+            setupUsersManagement();
+            
+            // Опасные действия
+            setupDangerActions();
+            
+            // Загрузка сохраненных настроек
+            loadSavedSettings();
+        }
+        
+        function setupColorPickers() {
+            // Основной цвет
+            const primaryColor = document.getElementById('primaryColor');
+            const primaryColorHex = document.getElementById('primaryColorHex');
+            const primaryColorPreview = document.getElementById('primaryColorPreview');
+            
+            if (primaryColor && primaryColorHex && primaryColorPreview) {
+                primaryColor.addEventListener('input', function() {
+                    primaryColorHex.value = this.value;
+                    primaryColorPreview.style.backgroundColor = this.value;
+                });
+                
+                primaryColorHex.addEventListener('input', function() {
+                    if (this.value.match(/^#[0-9A-F]{6}$/i)) {
+                        primaryColor.value = this.value;
+                        primaryColorPreview.style.backgroundColor = this.value;
+                    }
+                });
+            }
+            
+            // Цвет успеха
+            const successColor = document.getElementById('successColor');
+            const successColorHex = document.getElementById('successColorHex');
+            const successColorPreview = document.getElementById('successColorPreview');
+            
+            if (successColor && successColorHex && successColorPreview) {
+                successColor.addEventListener('input', function() {
+                    successColorHex.value = this.value;
+                    successColorPreview.style.backgroundColor = this.value;
+                });
+                
+                successColorHex.addEventListener('input', function() {
+                    if (this.value.match(/^#[0-9A-F]{6}$/i)) {
+                        successColor.value = this.value;
+                        successColorPreview.style.backgroundColor = this.value;
+                    }
+                });
+            }
+        }
+        
+        function setupUsersManagement() {
+            // Кнопка добавления пользователя
+            const addUserBtn = document.getElementById('addUserBtn');
+            if (addUserBtn) {
+                addUserBtn.addEventListener('click', function() {
+                    openModal('addUserModal');
+                });
+            }
+            
+            // Форма добавления пользователя
+            const addUserForm = document.getElementById('addUserForm');
+            if (addUserForm) {
+                addUserForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    handleAddUser(this);
+                });
+                
+                // Проверка паролей
+                const passwordInput = addUserForm.querySelector('input[name="password"]');
+                const confirmInput = addUserForm.querySelector('input[name="confirmPassword"]');
+                const mismatchDiv = document.getElementById('passwordMismatch');
+                const strengthDiv = document.getElementById('passwordStrength');
+                
+                function checkPasswords() {
+                    const password = passwordInput.value;
+                    const confirm = confirmInput.value;
+                    
+                    if (confirm && password !== confirm) {
+                        mismatchDiv.classList.remove('d-none');
+                        return false;
+                    } else {
+                        mismatchDiv.classList.add('d-none');
+                        return true;
+                    }
+                }
+                
+                function checkPasswordStrength() {
+                    const password = passwordInput.value;
+                    if (!password) {
+                        strengthDiv.textContent = '';
+                        return;
+                    }
+                    
+                    let strength = 0;
+                    if (password.length >= 8) strength++;
+                    if (/[a-z]/.test(password)) strength++;
+                    if (/[A-Z]/.test(password)) strength++;
+                    if (/[0-9]/.test(password)) strength++;
+                    if (/[^a-zA-Z0-9]/.test(password)) strength++;
+                    
+                    const messages = [
+                        'Очень слабый',
+                        'Слабый',
+                        'Средний',
+                        'Хороший',
+                        'Отличный',
+                        'Отличный'
+                    ];
+                    
+                    const colors = [
+                        'text-danger',
+                        'text-danger',
+                        'text-warning',
+                        'text-info',
+                        'text-success',
+                        'text-success'
+                    ];
+                    
+                    strengthDiv.textContent = `Надёжность: ${messages[strength]}`;
+                    strengthDiv.className = `form-text ${colors[strength]}`;
+                }
+                
+                passwordInput.addEventListener('input', function() {
+                    checkPasswordStrength();
+                    checkPasswords();
+                });
+                
+                confirmInput.addEventListener('input', checkPasswords);
+            }
+            
+            // Загрузка списка пользователей
+            loadUsersTable();
+        }
+        
+        function loadUsersTable() {
+            const tableBody = document.getElementById('usersTableBody');
+            if (!tableBody || !window.Auth) return;
+            
+            const users = window.Auth.getUsers();
+            
+            tableBody.innerHTML = users.map(user => `
+                <tr>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <div class="user-avatar-small mr-2">${user.avatar || user.name.charAt(0)}</div>
+                            <div>
+                                <div class="font-weight-500">${user.name}</div>
+                                <div class="text-muted small">@${user.username}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="badge ${getRoleBadgeClass(user.role)}">
+                            ${getRoleName(user.role)}
+                        </span>
+                    </td>
+                    <td>${user.email || '-'}</td>
+                    <td>
+                        ${user.lastLogin ? new Date(user.lastLogin).toLocaleDateString('ru-RU') : 'Никогда'}
+                    </td>
+                    <td>
+                        <span class="badge badge-success">Активен</span>
+                    </td>
+                    <td>
+                        <button class="action-btn edit" data-user-id="${user.id}" title="Редактировать">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="action-btn delete ${user.role === 'admin' ? 'd-none' : ''}" 
+                                data-user-id="${user.id}" title="Удалить">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+            
+            // Обработчики для кнопок действий
+            tableBody.querySelectorAll('.action-btn.edit').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const userId = parseInt(this.getAttribute('data-user-id'));
+                    editUser(userId);
+                });
+            });
+            
+            tableBody.querySelectorAll('.action-btn.delete').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const userId = parseInt(this.getAttribute('data-user-id'));
+                    deleteUser(userId);
+                });
+            });
+        }
+        
+        function getRoleBadgeClass(role) {
+            const classes = {
+                'admin': 'badge-primary',
+                'master': 'badge-info',
+                'accountant': 'badge-warning',
+                'manager': 'badge-success'
+            };
+            return classes[role] || 'badge-secondary';
+        }
+        
+        function getRoleName(role) {
+            const names = {
+                'admin': 'Администратор',
+                'master': 'Мастер',
+                'accountant': 'Бухгалтер',
+                'manager': 'Менеджер'
+            };
+            return names[role] || role;
+        }
+        
+        function handleAddUser(form) {
+            const formData = new FormData(form);
+            const userData = Object.fromEntries(formData.entries());
+            
+            // Проверка паролей
+            if (userData.password !== userData.confirmPassword) {
+                showAlert('Пароли не совпадают', 'error');
+                return;
+            }
+            
+            // Удаляем подтверждение пароля из данных
+            delete userData.confirmPassword;
+            
+            // Добавляем аватар (первые буквы имени)
+            if (!userData.avatar) {
+                const names = userData.name.split(' ');
+                userData.avatar = names.map(n => n.charAt(0)).join('');
+            }
+            
+            if (window.Auth) {
+                const result = window.Auth.addUser(userData);
+                if (result.success) {
+                    showAlert('Пользователь успешно добавлен', 'success');
+                    closeModal('addUserModal');
+                    form.reset();
+                    loadUsersTable();
+                } else {
+                    showAlert(result.message || 'Ошибка добавления пользователя', 'error');
+                }
+            }
+        }
+        
+        function editUser(userId) {
+            if (window.Auth) {
+                const users = window.Auth.getUsers();
+                const user = users.find(u => u.id === userId);
+                
+                if (user) {
+                    showAlert(`Редактирование пользователя ${user.name}`, 'info');
+                    // Здесь будет открытие формы редактирования
+                }
+            }
+        }
+        
+        function deleteUser(userId) {
+            if (!confirm('Вы уверены, что хотите удалить этого пользователя?')) {
+                return;
+            }
+            
+            if (window.Auth) {
+                const result = window.Auth.deleteUser(userId);
+                if (result.success) {
+                    showAlert(result.message, 'success');
+                    loadUsersTable();
+                } else {
+                    showAlert(result.message, 'error');
+                }
+            }
+        }
+        
+        function setupDangerActions() {
+            // Очистка кэша
+            const clearCacheBtn = document.getElementById('clearCacheBtn');
+            if (clearCacheBtn) {
+                clearCacheBtn.addEventListener('click', function() {
+                    if (confirm('Очистить кэш системы? Это может временно замедлить работу.')) {
+                        localStorage.removeItem('chip_service_cache');
+                        showAlert('Кэш очищен', 'success');
+                    }
+                });
+            }
+            
+            // Сброс настроек
+            const resetSettingsBtn = document.getElementById('resetSettingsBtn');
+            if (resetSettingsBtn) {
+                resetSettingsBtn.addEventListener('click', function() {
+                    if (confirm('Сбросить все настройки к значениям по умолчанию?')) {
+                        localStorage.removeItem('chip_service_settings');
+                        location.reload();
+                    }
+                });
+            }
+            
+            // Переустановка системы
+            const reinstallSystemBtn = document.getElementById('reinstallSystemBtn');
+            if (reinstallSystemBtn) {
+                reinstallSystemBtn.addEventListener('click', function() {
+                    if (confirm('ВНИМАНИЕ! Это удалит все данные системы. Продолжить?')) {
+                        if (confirm('Вы уверены? Это действие необратимо!')) {
+                            localStorage.clear();
+                            showAlert('Система сброшена. Перезагрузите страницу.', 'warning');
+                        }
+                    }
+                });
+            }
+        }
+        
+        function applyTheme(theme) {
+            document.body.setAttribute('data-theme', theme);
+            localStorage.setItem('chip_service_theme', theme);
+        }
+        
+        function saveAllSettings() {
+            // Собираем данные со всех форм
+            const forms = document.querySelectorAll('.settings-form');
+            const allSettings = {};
+            
+            forms.forEach(form => {
+                const formData = new FormData(form);
+                const settings = Object.fromEntries(formData.entries());
+                Object.assign(allSettings, settings);
+            });
+            
+            // Сохраняем в localStorage
+            localStorage.setItem('chip_service_settings', JSON.stringify(allSettings));
+            
+            showAlert('Настройки сохранены', 'success');
+            
+            // Применяем изменения
+            applySettings(allSettings);
+        }
+        
+        function loadSavedSettings() {
+            const savedSettings = localStorage.getItem('chip_service_settings');
+            if (!savedSettings) return;
+            
+            try {
+                const settings = JSON.parse(savedSettings);
+                applySettings(settings);
+                
+                // Заполняем формы сохраненными значениями
+                const forms = document.querySelectorAll('.settings-form');
+                forms.forEach(form => {
+                    const inputs = form.querySelectorAll('input, select, textarea');
+                    inputs.forEach(input => {
+                        const name = input.getAttribute('name');
+                        if (name && settings[name] !== undefined) {
+                            if (input.type === 'checkbox') {
+                                input.checked = settings[name];
+                            } else {
+                                input.value = settings[name];
+                            }
+                        }
+                    });
+                });
+                
+            } catch (error) {
+                console.error('Ошибка загрузки настроек:', error);
+            }
+        }
+        
+        function applySettings(settings) {
+            // Применяем тему
+            if (settings.theme) {
+                applyTheme(settings.theme);
+            }
+            
+            // Применяем основные цвета
+            if (settings.primaryColor) {
+                document.documentElement.style.setProperty('--color-primary', settings.primaryColor);
+            }
+            
+            if (settings.successColor) {
+                document.documentElement.style.setProperty('--color-success', settings.successColor);
+            }
+            
+            // Можно добавить больше применений настроек
+            console.log('Настройки применены:', settings);
+        }
+        
+        // Глобальные функции для работы с настройками
+        window.saveSettings = saveAllSettings;
+        window.loadSettings = loadSavedSettings;
+        
+        console.log('Страница настроек инициализирована');
+    </script>
+</body>
+</html>
