@@ -1,0 +1,1758 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мастера - ЧИП: Система управления сервисным центром</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <link rel="stylesheet" href="../css/responsive.css">
+    <style>
+        .masters-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: var(--spacing-xl);
+            flex-wrap: wrap;
+            gap: var(--spacing-md);
+        }
+        
+        .masters-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-xl);
+        }
+        .modal-header {
+            background: var(--color-bg-card);
+        }
+        .modal-footer {
+            background: var(--color-bg-card);
+        }
+        .stat-card {
+            background: var(--color-bg-card);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            box-shadow: var(--shadow-md);
+            border-left: 4px solid var(--color-primary);
+        }
+        
+        .stat-card.success {
+            border-left-color: var(--color-success);
+        }
+        
+        .stat-card.warning {
+            border-left-color: var(--color-warning);
+        }
+        
+        .stat-card.danger {
+            border-left-color: var(--color-danger);
+        }
+        
+        .stat-card.info {
+            border-left-color: var(--color-info);
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--color-text);
+            margin-bottom: var(--spacing-xs);
+        }
+        
+        .stat-label {
+            color: var(--color-text-light);
+            font-size: var(--font-size-sm);
+        }
+        
+        .master-specialty {
+            padding: 4px 10px;
+            border-radius: var(--radius-sm);
+            font-size: var(--font-size-xs);
+            font-weight: 500;
+            display: inline-block;
+        }
+        
+        .specialty-laptops {
+            background-color: rgba(59, 130, 246, 0.1);
+            color: var(--color-primary);
+        }
+        
+        .specialty-pc {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: var(--color-success);
+        }
+        
+        .specialty-mobile {
+            background-color: rgba(139, 92, 246, 0.1);
+            color: #8B5CF6;
+        }
+        
+        .specialty-printers {
+            background-color: rgba(245, 158, 11, 0.1);
+            color: var(--color-warning);
+        }
+        
+        .specialty-software {
+            background-color: rgba(236, 72, 153, 0.1);
+            color: #EC4899;
+        }
+        
+        .specialty-general {
+            background-color: rgba(107, 114, 128, 0.1);
+            color: var(--color-text-light);
+        }
+        
+        .master-status {
+            padding: 4px 10px;
+            border-radius: var(--radius-sm);
+            font-size: var(--font-size-xs);
+            font-weight: 500;
+            display: inline-block;
+        }
+        
+        .status-available {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: var(--color-success);
+        }
+        
+        .status-busy {
+            background-color: rgba(245, 158, 11, 0.1);
+            color: var(--color-warning);
+        }
+        
+        .status-vacation {
+            background-color: rgba(59, 130, 246, 0.1);
+            color: var(--color-primary);
+        }
+        
+        .status-sick {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: var(--color-danger);
+        }
+        
+        .search-filter {
+            display: flex;
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+            flex-wrap: wrap;
+        }
+        
+        .search-box {
+            flex: 1;
+            min-width: 300px;
+        }
+        
+        .filter-btn {
+            padding: var(--spacing-sm) var(--spacing-lg);
+            background-color: var(--color-bg);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            font-family: var(--font-family);
+            font-size: var(--font-size-sm);
+            color: var(--color-text-light);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+        
+        .filter-btn:hover {
+            background-color: var(--color-bg-hover);
+            color: var(--color-text);
+        }
+        
+        .filter-btn.active {
+            background-color: var(--color-primary);
+            color: white;
+            border-color: var(--color-primary);
+        }
+        
+        .master-actions {
+            display: flex;
+            gap: var(--spacing-xs);
+        }
+        
+        .master-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--color-primary-light);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: var(--font-size-lg);
+        }
+        
+        .master-row {
+            cursor: pointer;
+            transition: background-color var(--transition-fast);
+        }
+        
+        .master-row:hover {
+            background-color: var(--color-bg-hover);
+        }
+        
+        .empty-masters {
+            text-align: center;
+            padding: var(--spacing-2xl) var(--spacing-lg);
+        }
+        
+        .empty-masters-icon {
+            font-size: 48px;
+            color: var(--color-text-lighter);
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .empty-masters-title {
+            font-size: var(--font-size-xl);
+            font-weight: 600;
+            margin-bottom: var(--spacing-sm);
+            color: var(--color-text);
+        }
+        
+        .master-rating {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+        }
+        
+        .rating-stars {
+            color: #F59E0B;
+        }
+        
+        .master-performance {
+            font-size: var(--font-size-sm);
+            color: var(--color-text-light);
+        }
+        
+        .performance-up {
+            color: var(--color-success);
+        }
+        
+        .performance-down {
+            color: var(--color-danger);
+        }
+        
+        .schedule-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+        
+        .schedule-full {
+            background-color: var(--color-success);
+        }
+        
+        .schedule-medium {
+            background-color: var(--color-warning);
+        }
+        
+        .schedule-low {
+            background-color: var(--color-danger);
+        }
+        
+        .master-details {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Боковая панель навигации -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">Ч</div>
+                <div>
+                    <div class="logo-text">ЧИП: ServiceTrack</div>
+                    <div class="logo-subtext">Управление сервисным центром</div>
+                </div>
+            </div>
+            
+            <nav class="nav-menu">
+                <a href="../index.html" class="nav-item">
+                    <i class="fas fa-home"></i>
+                    <span>Дашборд</span>
+                </a>
+                <a href="orders.html" class="nav-item">
+                    <i class="fas fa-clipboard-list"></i>
+                    <span>Заявки</span>
+                </a>
+                <a href="clients.html" class="nav-item">
+                    <i class="fas fa-users"></i>
+                    <span>Клиенты</span>
+                </a>
+                <a href="employees.html" class="nav-item active">
+                    <i class="fas fa-user-cog"></i>
+                    <span>Мастера</span>
+                </a>
+                <a href="services.html" class="nav-item">
+                    <i class="fas fa-cogs"></i>
+                    <span>Услуги и запчасти</span>
+                </a>
+                <a href="reports.html" class="nav-item">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Отчёты</span>
+                </a>
+                <a href="settings.html" class="nav-item">
+                    <i class="fas fa-cog"></i>
+                    <span>Настройки</span>
+                </a>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="user-avatar">ИП</div>
+                <div class="user-info">
+                    <div class="user-name">Иван Петров</div>
+                    <div class="user-role">Администратор</div>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- Основное содержимое -->
+        <main class="main-content">
+            <!-- Верхняя панель -->
+            <header class="topbar">
+                <div style="display: flex; align-items: center; gap: var(--spacing-md);">
+                    <button class="mobile-menu-toggle" id="menuToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1 class="page-title">Мастера</h1>
+                </div>
+                
+                <div class="topbar-actions">
+                    <button class="btn btn-secondary" id="scheduleBtn">
+                        <i class="fas fa-calendar-alt"></i>
+                        График работы
+                    </button>
+                    <button class="btn btn-primary" id="addMasterBtn">
+                        <i class="fas fa-user-plus"></i>
+                        Добавить мастера
+                    </button>
+                </div>
+            </header>
+            
+            <!-- Статистика -->
+            <div class="masters-stats">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalMasters">0</div>
+                    <div class="stat-label">Всего мастеров</div>
+                </div>
+                <div class="stat-card success">
+                    <div class="stat-value" id="availableMasters">0</div>
+                    <div class="stat-label">Доступны сейчас</div>
+                </div>
+                <div class="stat-card warning">
+                    <div class="stat-value" id="totalOrders">0</div>
+                    <div class="stat-label">Активных заказов</div>
+                </div>
+                <div class="stat-card info">
+                    <div class="stat-value" id="avgRating">0</div>
+                    <div class="stat-label">Средний рейтинг</div>
+                </div>
+            </div>
+            
+            <!-- Поиск и фильтры -->
+            <div class="search-filter">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="mastersSearch" placeholder="Поиск мастеров...">
+                </div>
+                
+                <div style="display: flex; gap: var(--spacing-sm); flex-wrap: wrap;">
+                    <button class="filter-btn active" data-filter="all">
+                        <i class="fas fa-users"></i>
+                        Все мастера
+                    </button>
+                    <button class="filter-btn" data-filter="available">
+                        <i class="fas fa-check-circle"></i>
+                        Доступны
+                    </button>
+                    <button class="filter-btn" data-filter="busy">
+                        <i class="fas fa-clock"></i>
+                        Заняты
+                    </button>
+                    <button class="filter-btn" data-filter="specialty">
+                        <i class="fas fa-tools"></i>
+                        Специалисты
+                    </button>
+                </div>
+                
+                <select class="form-control" id="sortBy" style="width: 200px;">
+                    <option value="name_asc">По имени (А-Я)</option>
+                    <option value="name_desc">По имени (Я-А)</option>
+                    <option value="rating_desc">По рейтингу (высокий)</option>
+                    <option value="rating_asc">По рейтингу (низкий)</option>
+                    <option value="orders_desc">По заказам (убыв.)</option>
+                    <option value="orders_asc">По заказам (возр.)</option>
+                </select>
+            </div>
+            
+            <!-- Таблица мастеров -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Список мастеров</h3>
+                    <div class="card-actions">
+                        <button class="btn btn-sm btn-secondary" id="importMastersBtn">
+                            <i class="fas fa-file-import"></i>
+                            Импорт
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 60px;"></th>
+                                    <th>Мастер</th>
+                                    <th>Специализация</th>
+                                    <th>Статус</th>
+                                    <th>Рейтинг</th>
+                                    <th>Заказы</th>
+                                    <th>Ставка</th>
+                                    <th>График</th>
+                                    <th>Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody id="mastersTableBody">
+                                <!-- Мастера загружаются через JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Состояние "нет мастеров" -->
+                    <div class="empty-masters d-none" id="emptyMasters">
+                        <div class="empty-masters-icon">
+                            <i class="fas fa-user-cog"></i>
+                        </div>
+                        <h3 class="empty-masters-title">Мастера не найдены</h3>
+                        <p class="mb-4">Добавьте первого мастера или измените параметры поиска</p>
+                        <button class="btn btn-primary" id="addFirstMasterBtn">
+                            <i class="fas fa-user-plus"></i>
+                            Добавить мастера
+                        </button>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="text-muted small" id="mastersInfo">
+                            Показано 0 из 0 мастеров
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Модальное окно добавления мастера -->
+    <div class="modal" id="addMasterModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Добавление мастера</h3>
+                <button class="modal-close" data-modal="addMasterModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="addMasterForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Фамилия <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="lastName" required 
+                                       placeholder="Сидоров">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Имя <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="firstName" required 
+                                       placeholder="Петр">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Отчество</label>
+                        <input type="text" class="form-control" name="middleName" 
+                               placeholder="Иванович">
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Телефон <span class="text-danger">*</span></label>
+                                <input type="tel" class="form-control" name="phone" required 
+                                       placeholder="+7 (999) 123-45-67">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-control" name="email" 
+                                       placeholder="master@example.com">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Дата рождения</label>
+                                <input type="date" class="form-control" name="birthDate">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Дата приема</label>
+                                <input type="date" class="form-control" name="hireDate" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Специализация <span class="text-danger">*</span></label>
+                        <select class="form-control" name="specialty" required>
+                            <option value="">Выберите специализацию</option>
+                            <option value="laptops">Ноутбуки</option>
+                            <option value="pc">Компьютеры и ПК</option>
+                            <option value="mobile">Смартфоны и планшеты</option>
+                            <option value="printers">Принтеры и МФУ</option>
+                            <option value="software">Программное обеспечение</option>
+                            <option value="general">Универсальный мастер</option>
+                        </select>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Ставка (%) <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" name="rate" required 
+                                       min="0" max="100" step="5" value="30">
+                                <small class="text-muted">Процент от стоимости заказа</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Зарплата (₽)</label>
+                                <input type="number" class="form-control" name="salary" 
+                                       min="0" step="1000" placeholder="Оклад">
+                                <small class="text-muted">Фиксированный оклад (необязательно)</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Опыт работы (лет)</label>
+                        <input type="number" class="form-control" name="experience" 
+                               min="0" max="50" value="3">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Образование</label>
+                        <textarea class="form-control" name="education" rows="2" 
+                                  placeholder="Образование, курсы, сертификаты"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Навыки</label>
+                        <textarea class="form-control" name="skills" rows="2" 
+                                  placeholder="Технические навыки, компетенции"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Адрес</label>
+                        <textarea class="form-control" name="address" rows="2" 
+                                  placeholder="Адрес проживания"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Паспортные данные</label>
+                        <textarea class="form-control" name="passport" rows="2" 
+                                  placeholder="Серия, номер, кем и когда выдан"></textarea>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">График работы</label>
+                                <select class="form-control" name="schedule">
+                                    <option value="full">Полный день (5/2)</option>
+                                    <option value="shift">Сменный график</option>
+                                    <option value="flexible">Гибкий график</option>
+                                    <option value="part">Частичная занятость</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Статус</label>
+                                <select class="form-control" name="status" required>
+                                    <option value="available">Доступен</option>
+                                    <option value="busy">Занят</option>
+                                    <option value="vacation">Отпуск</option>
+                                    <option value="sick">На больничном</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="checkbox">
+                            <input type="checkbox" name="isActive" checked>
+                            <span class="checkbox-text">Мастер активен</span>
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-modal="addMasterModal">Отмена</button>
+                <button type="submit" form="addMasterForm" class="btn btn-primary">Добавить мастера</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно просмотра мастера -->
+    <div class="modal" id="viewMasterModal">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h3 class="modal-title">Информация о мастере</h3>
+                <button class="modal-close" data-modal="viewMasterModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="masterDetails">
+                    <!-- Информация загружается через JavaScript -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-modal="viewMasterModal">Закрыть</button>
+                <button type="button" class="btn btn-primary" id="editMasterFromViewBtn">Редактировать</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно графика работы -->
+    <div class="modal" id="scheduleModal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h3 class="modal-title">График работы мастеров</h3>
+                <button class="modal-close" data-modal="scheduleModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="scheduleContent">
+                    <!-- График загружается через JavaScript -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-modal="scheduleModal">Закрыть</button>
+                <button type="button" class="btn btn-primary" id="printScheduleBtn">Печать графика</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/main.js"></script>
+    <script>
+        // Система управления мастерами
+        class MastersSystem {
+            constructor() {
+                this.masters = this.loadMasters();
+                this.storageKey = 'chip_masters';
+            }
+            
+            loadMasters() {
+                const saved = localStorage.getItem(this.storageKey);
+                if (saved) return JSON.parse(saved);
+                
+                // Демо-мастера
+                const demoMasters = [
+                    {
+                        id: 1,
+                        firstName: "Петр",
+                        lastName: "Сидоров",
+                        middleName: "Иванович",
+                        fullName: "Сидоров Петр Иванович",
+                        phone: "+7 (999) 777-88-99",
+                        email: "p.sidorov@service.ru",
+                        birthDate: "1988-07-15",
+                        hireDate: "2023-01-15",
+                        specialty: "laptops",
+                        specialtyText: "Ноутбуки",
+                        rate: 30,
+                        salary: 45000,
+                        experience: 8,
+                        education: "Высшее техническое образование, сертификаты по ремонту ноутбуков",
+                        skills: "Диагностика, замена компонентов, пайка BGA, восстановление данных",
+                        address: "г. Москва, ул. Рабочая, д. 12, кв. 34",
+                        passport: "45 12 345678, выдан ОВД г. Москвы 15.07.2010",
+                        schedule: "full",
+                        status: "busy",
+                        rating: 4.8,
+                        completedOrders: 245,
+                        currentOrders: 3,
+                        totalEarned: 1250000,
+                        isActive: true,
+                        createdAt: "2023-01-15"
+                    },
+                    {
+                        id: 2,
+                        firstName: "Анна",
+                        lastName: "Ковалева",
+                        middleName: "Сергеевна",
+                        fullName: "Ковалева Анна Сергеевна",
+                        phone: "+7 (999) 888-77-66",
+                        email: "a.kovaleva@service.ru",
+                        birthDate: "1992-03-22",
+                        hireDate: "2023-06-10",
+                        specialty: "mobile",
+                        specialtyText: "Смартфоны",
+                        rate: 25,
+                        salary: 40000,
+                        experience: 5,
+                        education: "Курсы по ремонту мобильных устройств, Apple Certified Technician",
+                        skills: "Замена дисплеев, ремонт плат, восстановление после воды, разблокировка",
+                        address: "г. Москва, ул. Молодежная, д. 7, кв. 15",
+                        passport: "46 23 456789, выдан УФМС г. Москвы 22.03.2012",
+                        schedule: "shift",
+                        status: "available",
+                        rating: 4.9,
+                        completedOrders: 178,
+                        currentOrders: 1,
+                        totalEarned: 890000,
+                        isActive: true,
+                        createdAt: "2023-06-10"
+                    },
+                    {
+                        id: 3,
+                        firstName: "Михаил",
+                        lastName: "Волков",
+                        middleName: "Андреевич",
+                        fullName: "Волков Михаил Андреевич",
+                        phone: "+7 (999) 666-55-44",
+                        email: "m.volkov@service.ru",
+                        birthDate: "1985-11-30",
+                        hireDate: "2022-09-01",
+                        specialty: "general",
+                        specialtyText: "Универсальный",
+                        rate: 35,
+                        salary: 50000,
+                        experience: 12,
+                        education: "Инженер по компьютерам, сертификаты Microsoft, Cisco",
+                        skills: "Компьютеры, сети, серверы, программное обеспечение, оргтехника",
+                        address: "г. Москва, пр. Победы, д. 45, кв. 89",
+                        passport: "47 34 567890, выдан ГУ МВД г. Москвы 30.11.2005",
+                        schedule: "full",
+                        status: "vacation",
+                        rating: 4.7,
+                        completedOrders: 312,
+                        currentOrders: 0,
+                        totalEarned: 1560000,
+                        isActive: true,
+                        createdAt: "2022-09-01"
+                    },
+                    {
+                        id: 4,
+                        firstName: "Ольга",
+                        lastName: "Новикова",
+                        middleName: "Дмитриевна",
+                        fullName: "Новикова Ольга Дмитриевна",
+                        phone: "+7 (999) 555-44-33",
+                        email: "o.novikova@service.ru",
+                        birthDate: "1990-05-18",
+                        hireDate: "2024-02-20",
+                        specialty: "software",
+                        specialtyText: "ПО и настройка",
+                        rate: 20,
+                        salary: 35000,
+                        experience: 6,
+                        education: "Программист, курсы по администрированию",
+                        skills: "Установка ОС, настройка программ, удаление вирусов, восстановление данных",
+                        address: "г. Москва, ул. Цифровая, д. 3, кв. 22",
+                        passport: "48 45 678901, выдан ОВД г. Москвы 18.05.2010",
+                        schedule: "flexible",
+                        status: "available",
+                        rating: 4.6,
+                        completedOrders: 89,
+                        currentOrders: 2,
+                        totalEarned: 267000,
+                        isActive: true,
+                        createdAt: "2024-02-20"
+                    }
+                ];
+                
+                this.saveMasters(demoMasters);
+                return demoMasters;
+            }
+            
+            saveMasters(masters) {
+                localStorage.setItem(this.storageKey, JSON.stringify(masters));
+            }
+            
+            getMasters(filter = {}) {
+                let filtered = [...this.masters];
+                
+                if (filter.status && filter.status !== 'all') {
+                    if (filter.status === 'available') {
+                        filtered = filtered.filter(m => m.status === 'available');
+                    } else if (filter.status === 'busy') {
+                        filtered = filtered.filter(m => m.status === 'busy');
+                    } else if (filter.status === 'specialty') {
+                        filtered = filtered.filter(m => m.specialty !== 'general');
+                    }
+                }
+                
+                if (filter.search) {
+                    const searchTerm = filter.search.toLowerCase();
+                    filtered = filtered.filter(m => 
+                        m.fullName.toLowerCase().includes(searchTerm) ||
+                        m.phone.toLowerCase().includes(searchTerm) ||
+                        m.email?.toLowerCase().includes(searchTerm) ||
+                        m.skills?.toLowerCase().includes(searchTerm)
+                    );
+                }
+                
+                if (filter.activeOnly) {
+                    filtered = filtered.filter(m => m.isActive);
+                }
+                
+                // Сортировка
+                if (filter.sortBy) {
+                    filtered.sort((a, b) => {
+                        switch(filter.sortBy) {
+                            case 'name_asc':
+                                return a.fullName.localeCompare(b.fullName);
+                            case 'name_desc':
+                                return b.fullName.localeCompare(a.fullName);
+                            case 'rating_desc':
+                                return b.rating - a.rating;
+                            case 'rating_asc':
+                                return a.rating - b.rating;
+                            case 'orders_desc':
+                                return b.completedOrders - a.completedOrders;
+                            case 'orders_asc':
+                                return a.completedOrders - b.completedOrders;
+                            default:
+                                return 0;
+                        }
+                    });
+                }
+                
+                return filtered;
+            }
+            
+            addMaster(masterData) {
+                const fullName = `${masterData.lastName} ${masterData.firstName} ${masterData.middleName || ''}`.trim();
+                const specialtyText = getSpecialtyText(masterData.specialty);
+                
+                const newMaster = {
+                    id: this.masters.length > 0 ? Math.max(...this.masters.map(m => m.id)) + 1 : 1,
+                    ...masterData,
+                    fullName,
+                    specialtyText,
+                    rating: 4.5,
+                    completedOrders: 0,
+                    currentOrders: 0,
+                    totalEarned: 0,
+                    createdAt: new Date().toISOString()
+                };
+                
+                this.masters.push(newMaster);
+                this.saveMasters(this.masters);
+                
+                return {
+                    success: true,
+                    master: newMaster
+                };
+            }
+            
+            updateMaster(masterId, masterData) {
+                const index = this.masters.findIndex(m => m.id === masterId);
+                if (index === -1) {
+                    return {
+                        success: false,
+                        message: 'Мастер не найден'
+                    };
+                }
+                
+                if (masterData.lastName || masterData.firstName || masterData.middleName) {
+                    const lastName = masterData.lastName || this.masters[index].lastName;
+                    const firstName = masterData.firstName || this.masters[index].firstName;
+                    const middleName = masterData.middleName || this.masters[index].middleName;
+                    masterData.fullName = `${lastName} ${firstName} ${middleName || ''}`.trim();
+                }
+                
+                if (masterData.specialty) {
+                    masterData.specialtyText = getSpecialtyText(masterData.specialty);
+                }
+                
+                this.masters[index] = {
+                    ...this.masters[index],
+                    ...masterData
+                };
+                
+                this.saveMasters(this.masters);
+                
+                return {
+                    success: true,
+                    master: this.masters[index]
+                };
+            }
+            
+            deleteMaster(masterId) {
+                const index = this.masters.findIndex(m => m.id === masterId);
+                if (index === -1) {
+                    return {
+                        success: false,
+                        message: 'Мастер не найден'
+                    };
+                }
+                
+                // Не удаляем, а делаем неактивным
+                this.masters[index].isActive = false;
+                this.saveMasters(this.masters);
+                
+                return {
+                    success: true,
+                    message: 'Мастер отключен'
+                };
+            }
+            
+            getMasterStats() {
+                const totalMasters = this.masters.filter(m => m.isActive).length;
+                const availableMasters = this.masters.filter(m => m.isActive && m.status === 'available').length;
+                const totalOrders = this.masters.reduce((sum, master) => sum + master.currentOrders, 0);
+                const avgRating = this.masters.length > 0 
+                    ? (this.masters.reduce((sum, master) => sum + master.rating, 0) / this.masters.length).toFixed(1)
+                    : 0;
+                
+                const specialtyCounts = {
+                    laptops: this.masters.filter(m => m.specialty === 'laptops').length,
+                    pc: this.masters.filter(m => m.specialty === 'pc').length,
+                    mobile: this.masters.filter(m => m.specialty === 'mobile').length,
+                    printers: this.masters.filter(m => m.specialty === 'printers').length,
+                    software: this.masters.filter(m => m.specialty === 'software').length,
+                    general: this.masters.filter(m => m.specialty === 'general').length
+                };
+                
+                return {
+                    totalMasters,
+                    availableMasters,
+                    totalOrders,
+                    avgRating,
+                    specialtyCounts
+                };
+            }
+            
+            updateMasterOrders(masterId, orderCount, operation = 'add') {
+                const index = this.masters.findIndex(m => m.id === masterId);
+                if (index === -1) return false;
+                
+                if (operation === 'add') {
+                    this.masters[index].currentOrders += orderCount;
+                } else if (operation === 'complete') {
+                    this.masters[index].currentOrders = Math.max(0, this.masters[index].currentOrders - 1);
+                    this.masters[index].completedOrders += 1;
+                } else if (operation === 'set') {
+                    this.masters[index].currentOrders = orderCount;
+                }
+                
+                this.saveMasters(this.masters);
+                return true;
+            }
+        }
+        
+        // Создаем глобальный экземпляр системы
+        window.Masters = new MastersSystem();
+        
+        // Инициализация страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            initMastersPage();
+        });
+        
+        function initMastersPage() {
+            // Кнопки добавления
+            document.getElementById('addMasterBtn')?.addEventListener('click', function() {
+                openModal('addMasterModal');
+                loadMasterForm();
+            });
+            
+            document.getElementById('addFirstMasterBtn')?.addEventListener('click', function() {
+                openModal('addMasterModal');
+                loadMasterForm();
+            });
+            
+            document.getElementById('scheduleBtn')?.addEventListener('click', showSchedule);
+            document.getElementById('importMastersBtn')?.addEventListener('click', importMasters);
+            document.getElementById('editMasterFromViewBtn')?.addEventListener('click', editMasterFromView);
+            document.getElementById('printScheduleBtn')?.addEventListener('click', printSchedule);
+            
+            // Формы
+            document.getElementById('addMasterForm')?.addEventListener('submit', handleAddMaster);
+            
+            // Поиск
+            const searchInput = document.getElementById('mastersSearch');
+            if (searchInput) {
+                searchInput.addEventListener('input', debounce(performSearch, 300));
+            }
+            
+            // Фильтры
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    applyFilters();
+                });
+            });
+            
+            // Сортировка
+            const sortSelect = document.getElementById('sortBy');
+            if (sortSelect) {
+                sortSelect.addEventListener('change', function() {
+                    applyFilters();
+                });
+            }
+            
+            // Загрузка начальных данных
+            loadMasterStats();
+            loadMastersTable();
+        }
+        
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+        
+        function loadMasterStats() {
+            const stats = Masters.getMasterStats();
+            
+            document.getElementById('totalMasters').textContent = stats.totalMasters;
+            document.getElementById('availableMasters').textContent = stats.availableMasters;
+            document.getElementById('totalOrders').textContent = stats.totalOrders;
+            document.getElementById('avgRating').textContent = stats.avgRating;
+        }
+        
+        function loadMastersTable() {
+            const tbody = document.getElementById('mastersTableBody');
+            const emptyState = document.getElementById('emptyMasters');
+            const mastersInfo = document.getElementById('mastersInfo');
+            
+            if (!tbody || !emptyState || !mastersInfo) return;
+            
+            const filters = getCurrentFilters();
+            filters.activeOnly = true;
+            
+            const masters = Masters.getMasters(filters);
+            
+            // Обновляем статистику
+            loadMasterStats();
+            
+            if (masters.length === 0) {
+                tbody.innerHTML = '';
+                emptyState.classList.remove('d-none');
+                mastersInfo.textContent = 'Показано 0 из 0 мастеров';
+                return;
+            }
+            
+            emptyState.classList.add('d-none');
+            
+            // Генерируем строки таблицы
+            tbody.innerHTML = masters.map(master => {
+                const specialtyClass = `specialty-${master.specialty}`;
+                const statusClass = `status-${master.status}`;
+                const statusText = getStatusText(master.status);
+                const initials = getInitials(master.firstName, master.lastName);
+                const avatarColor = getAvatarColor(master.id);
+                const ratingStars = getRatingStars(master.rating);
+                const scheduleClass = getScheduleClass(master.currentOrders);
+                const scheduleText = getScheduleText(master.schedule);
+                
+                return `
+                <tr class="master-row" data-master-id="${master.id}">
+                    <td>
+                        <div class="master-avatar" style="background-color: ${avatarColor}">
+                            ${initials}
+                        </div>
+                    </td>
+                    <td>
+                        <div class="master-details">
+                            <div>
+                                <div class="font-weight-medium">${master.fullName}</div>
+                                <div class="text-muted small">${master.phone}</div>
+                                ${master.email ? `<div class="text-muted small">${master.email}</div>` : ''}
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="master-specialty ${specialtyClass}">${master.specialtyText}</span>
+                    </td>
+                    <td>
+                        <span class="master-status ${statusClass}">${statusText}</span>
+                    </td>
+                    <td>
+                        <div class="master-rating">
+                            <div class="rating-stars">${ratingStars}</div>
+                            <span class="font-weight-medium">${master.rating.toFixed(1)}</span>
+                        </div>
+                        <div class="master-performance">
+                            <small>Завершено: ${master.completedOrders}</small>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="text-center">
+                            <div class="font-weight-medium">${master.currentOrders}</div>
+                            <div class="text-muted small">Всего: ${master.completedOrders}</div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="font-weight-medium">${master.rate}%</div>
+                        ${master.salary ? `<div class="text-muted small">${master.salary.toLocaleString('ru-RU')} ₽</div>` : ''}
+                    </td>
+                    <td>
+                        <div>
+                            <span class="schedule-indicator ${scheduleClass}"></span>
+                            <span>${scheduleText}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="master-actions">
+                            <button class="action-btn view" data-master-id="${master.id}" title="Просмотр">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="action-btn edit" data-master-id="${master.id}" title="Редактировать">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="action-btn delete" data-master-id="${master.id}" title="Удалить">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `}).join('');
+            
+            // Информация о мастерах
+            mastersInfo.textContent = `Показано ${masters.length} мастеров`;
+            
+            // Обработчики для строк таблицы
+            tbody.querySelectorAll('.master-row').forEach(row => {
+                row.addEventListener('click', function(e) {
+                    if (!e.target.closest('.action-btn')) {
+                        const masterId = parseInt(this.getAttribute('data-master-id'));
+                        viewMaster(masterId);
+                    }
+                });
+            });
+            
+            // Обработчики для кнопок действий
+            tbody.querySelectorAll('.action-btn.view').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const masterId = parseInt(this.getAttribute('data-master-id'));
+                    viewMaster(masterId);
+                });
+            });
+            
+            tbody.querySelectorAll('.action-btn.edit').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const masterId = parseInt(this.getAttribute('data-master-id'));
+                    editMaster(masterId);
+                });
+            });
+            
+            tbody.querySelectorAll('.action-btn.delete').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const masterId = parseInt(this.getAttribute('data-master-id'));
+                    deleteMaster(masterId);
+                });
+            });
+        }
+        
+        function getCurrentFilters() {
+            const filters = {};
+            
+            // Активный фильтр
+            const activeFilter = document.querySelector('.filter-btn.active');
+            if (activeFilter) {
+                filters.status = activeFilter.getAttribute('data-filter');
+            }
+            
+            // Поиск
+            const searchInput = document.getElementById('mastersSearch');
+            if (searchInput && searchInput.value.trim()) {
+                filters.search = searchInput.value.trim();
+            }
+            
+            // Сортировка
+            const sortSelect = document.getElementById('sortBy');
+            if (sortSelect) {
+                filters.sortBy = sortSelect.value;
+            }
+            
+            return filters;
+        }
+        
+        function performSearch() {
+            applyFilters();
+        }
+        
+        function applyFilters() {
+            loadMastersTable();
+        }
+        
+        function loadMasterForm() {
+            const form = document.getElementById('addMasterForm');
+            if (!form) return;
+            
+            // Сброс формы
+            form.reset();
+            
+            // Устанавливаем сегодняшнюю дату как минимальную для даты рождения
+            const birthDateInput = form.querySelector('[name="birthDate"]');
+            const hireDateInput = form.querySelector('[name="hireDate"]');
+            
+            if (birthDateInput) {
+                const today = new Date().toISOString().split('T')[0];
+                birthDateInput.max = today;
+            }
+            
+            if (hireDateInput) {
+                const today = new Date().toISOString().split('T')[0];
+                hireDateInput.value = today;
+                hireDateInput.max = today;
+            }
+            
+            // Устанавливаем заголовок по умолчанию
+            const modalTitle = document.querySelector('#addMasterModal .modal-title');
+            if (modalTitle) modalTitle.textContent = 'Добавление мастера';
+            
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) submitBtn.textContent = 'Добавить мастера';
+        }
+        
+        function handleAddMaster(event) {
+            event.preventDefault();
+            
+            const form = event.target;
+            const formData = new FormData(form);
+            
+            const masterData = {
+                firstName: formData.get('firstName'),
+                lastName: formData.get('lastName'),
+                middleName: formData.get('middleName'),
+                phone: formData.get('phone'),
+                email: formData.get('email'),
+                birthDate: formData.get('birthDate') || null,
+                hireDate: formData.get('hireDate'),
+                specialty: formData.get('specialty'),
+                rate: parseFloat(formData.get('rate')),
+                salary: formData.get('salary') ? parseFloat(formData.get('salary')) : null,
+                experience: parseInt(formData.get('experience')),
+                education: formData.get('education') || '',
+                skills: formData.get('skills') || '',
+                address: formData.get('address') || '',
+                passport: formData.get('passport') || '',
+                schedule: formData.get('schedule'),
+                status: formData.get('status'),
+                isActive: formData.get('isActive') === 'on'
+            };
+            
+            const result = Masters.addMaster(masterData);
+            
+            if (result.success) {
+                showNotification('Мастер успешно добавлен!', 'success');
+                closeModal('addMasterModal');
+                loadMastersTable();
+                loadMasterStats();
+            } else {
+                showNotification('Ошибка при добавлении мастера', 'error');
+            }
+        }
+        
+        function viewMaster(masterId) {
+            const master = Masters.masters.find(m => m.id === masterId);
+            if (!master) return;
+            
+            const modalContent = document.getElementById('masterDetails');
+            if (!modalContent) return;
+            
+            const hireDate = new Date(master.hireDate).toLocaleDateString('ru-RU');
+            const birthDate = master.birthDate ? new Date(master.birthDate).toLocaleDateString('ru-RU') : 'Не указана';
+            const statusText = getStatusText(master.status);
+            const scheduleText = getScheduleText(master.schedule);
+            const ratingStars = getRatingStars(master.rating);
+            const totalEarned = master.totalEarned.toLocaleString('ru-RU');
+            const avgOrder = master.completedOrders > 0 
+                ? Math.round(master.totalEarned / master.completedOrders).toLocaleString('ru-RU')
+                : '0';
+            
+            modalContent.innerHTML = `
+                <div class="row mb-4">
+                    <div class="col-md-3 text-center">
+                        <div class="master-avatar" style="width: 80px; height: 80px; font-size: 32px; margin: 0 auto 15px; background-color: ${getAvatarColor(master.id)}">
+                            ${getInitials(master.firstName, master.lastName)}
+                        </div>
+                        <h4>${master.fullName}</h4>
+                        <span class="master-status status-${master.status}">${statusText}</span>
+                    </div>
+                    <div class="col-md-9">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="text-muted small">Телефон</label>
+                                    <div class="font-weight-medium">${master.phone}</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="text-muted small">Email</label>
+                                    <div class="font-weight-medium">${master.email || 'Не указан'}</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="text-muted small">Дата рождения</label>
+                                    <div class="font-weight-medium">${birthDate}</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="text-muted small">Дата приема</label>
+                                    <div class="font-weight-medium">${hireDate}</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="text-muted small">Специализация</label>
+                                    <div>
+                                        <span class="master-specialty specialty-${master.specialty}">${master.specialtyText}</span>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="text-muted small">Опыт работы</label>
+                                    <div class="font-weight-medium">${master.experience} лет</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="text-muted small">Ставка</label>
+                                    <div class="font-weight-medium">${master.rate}% от заказа</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="text-muted small">График работы</label>
+                                    <div class="font-weight-medium">${scheduleText}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">Статистика работы</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row text-center">
+                                    <div class="col-4">
+                                        <div class="stat-value" style="font-size: 1.5rem;">${master.completedOrders}</div>
+                                        <div class="stat-label">Завершено</div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="stat-value" style="font-size: 1.5rem;">${master.currentOrders}</div>
+                                        <div class="stat-label">Текущие</div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="stat-value" style="font-size: 1.5rem;">${totalEarned} ₽</div>
+                                        <div class="stat-label">Заработано</div>
+                                    </div>
+                                </div>
+                                <div class="mt-3 text-center">
+                                    <div class="master-rating justify-content-center">
+                                        <div class="rating-stars">${ratingStars}</div>
+                                        <span class="font-weight-medium ml-2">${master.rating.toFixed(1)}</span>
+                                    </div>
+                                    <div class="text-muted small mt-1">
+                                        Средний заказ: ${avgOrder} ₽
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">Финансы</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label class="text-muted small">Ставка</label>
+                                    <div class="font-weight-medium">${master.rate}% от стоимости заказа</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="text-muted small">Оклад</label>
+                                    <div class="font-weight-medium">${master.salary ? master.salary.toLocaleString('ru-RU') + ' ₽' : 'Не установлен'}</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="text-muted small">Всего заработал</label>
+                                    <div class="font-weight-medium">${totalEarned} ₽</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">Образование и навыки</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label class="text-muted small">Образование</label>
+                                    <div>${master.education || 'Не указано'}</div>
+                                </div>
+                                <div>
+                                    <label class="text-muted small">Навыки</label>
+                                    <div>${master.skills || 'Не указаны'}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">Персональные данные</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label class="text-muted small">Адрес</label>
+                                    <div>${master.address || 'Не указан'}</div>
+                                </div>
+                                <div>
+                                    <label class="text-muted small">Паспортные данные</label>
+                                    <div>${master.passport || 'Не указаны'}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Сохраняем ID мастера для кнопки редактирования
+            const editBtn = document.getElementById('editMasterFromViewBtn');
+            if (editBtn) {
+                editBtn.dataset.masterId = masterId;
+            }
+            
+            openModal('viewMasterModal');
+        }
+        
+        function editMasterFromView() {
+            const masterId = this.dataset.masterId;
+            if (masterId) {
+                closeModal('viewMasterModal');
+                editMaster(parseInt(masterId));
+            }
+        }
+        
+        function editMaster(masterId) {
+            const master = Masters.masters.find(m => m.id === masterId);
+            if (!master) return;
+            
+            openModal('addMasterModal');
+            
+            const form = document.getElementById('addMasterForm');
+            if (form) {
+                form.querySelector('[name="firstName"]').value = master.firstName;
+                form.querySelector('[name="lastName"]').value = master.lastName;
+                form.querySelector('[name="middleName"]').value = master.middleName || '';
+                form.querySelector('[name="phone"]').value = master.phone;
+                form.querySelector('[name="email"]').value = master.email || '';
+                form.querySelector('[name="birthDate"]').value = master.birthDate || '';
+                form.querySelector('[name="hireDate"]').value = master.hireDate;
+                form.querySelector('[name="specialty"]').value = master.specialty;
+                form.querySelector('[name="rate"]').value = master.rate;
+                form.querySelector('[name="salary"]').value = master.salary || '';
+                form.querySelector('[name="experience"]').value = master.experience;
+                form.querySelector('[name="education"]').value = master.education || '';
+                form.querySelector('[name="skills"]').value = master.skills || '';
+                form.querySelector('[name="address"]').value = master.address || '';
+                form.querySelector('[name="passport"]').value = master.passport || '';
+                form.querySelector('[name="schedule"]').value = master.schedule;
+                form.querySelector('[name="status"]').value = master.status;
+                form.querySelector('[name="isActive"]').checked = master.isActive;
+                
+                // Изменяем заголовок и действие формы
+                const modalTitle = document.querySelector('#addMasterModal .modal-title');
+                if (modalTitle) modalTitle.textContent = 'Редактирование мастера';
+                
+                const submitBtn = form.querySelector('button[type="submit"]');
+                if (submitBtn) submitBtn.textContent = 'Сохранить изменения';
+                
+                // Удаляем старый обработчик и добавляем новый
+                form.removeEventListener('submit', handleAddMaster);
+                form.addEventListener('submit', function(event) {
+                    event.preventDefault();
+                    
+                    const formData = new FormData(form);
+                    
+                    const updatedData = {
+                        firstName: formData.get('firstName'),
+                        lastName: formData.get('lastName'),
+                        middleName: formData.get('middleName'),
+                        phone: formData.get('phone'),
+                        email: formData.get('email'),
+                        birthDate: formData.get('birthDate') || null,
+                        hireDate: formData.get('hireDate'),
+                        specialty: formData.get('specialty'),
+                        rate: parseFloat(formData.get('rate')),
+                        salary: formData.get('salary') ? parseFloat(formData.get('salary')) : null,
+                        experience: parseInt(formData.get('experience')),
+                        education: formData.get('education') || '',
+                        skills: formData.get('skills') || '',
+                        address: formData.get('address') || '',
+                        passport: formData.get('passport') || '',
+                        schedule: formData.get('schedule'),
+                        status: formData.get('status'),
+                        isActive: formData.get('isActive') === 'on'
+                    };
+                    
+                    const result = Masters.updateMaster(masterId, updatedData);
+                    
+                    if (result.success) {
+                        showNotification('Мастер успешно обновлен!', 'success');
+                        closeModal('addMasterModal');
+                        loadMastersTable();
+                        loadMasterStats();
+                    } else {
+                        showNotification('Ошибка при обновлении мастера', 'error');
+                    }
+                });
+            }
+        }
+        
+        function deleteMaster(masterId) {
+            const master = Masters.masters.find(m => m.id === masterId);
+            if (!master) return;
+            
+            if (master.currentOrders > 0) {
+                alert('Нельзя отключить мастера, у которого есть текущие заказы.');
+                return;
+            }
+            
+            if (confirm('Вы уверены, что хотите отключить этого мастера? Мастер будет помечен как неактивный.')) {
+                const result = Masters.deleteMaster(masterId);
+                
+                if (result.success) {
+                    showNotification('Мастер отключен', 'success');
+                    loadMastersTable();
+                    loadMasterStats();
+                } else {
+                    showNotification('Ошибка при отключении мастера', 'error');
+                }
+            }
+        }
+        
+        function showSchedule() {
+            const modalContent = document.getElementById('scheduleContent');
+            if (!modalContent) return;
+            
+            const masters = Masters.getMasters({ activeOnly: true });
+            const days = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'];
+            
+            let html = `
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Мастер</th>
+                                <th>График</th>
+                                ${days.map(day => `<th>${day}</th>`).join('')}
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            masters.forEach(master => {
+                const scheduleText = getScheduleText(master.schedule);
+                const scheduleClass = getScheduleClass(master.currentOrders);
+                const initials = getInitials(master.firstName, master.lastName);
+                
+                html += `
+                    <tr>
+                        <td>
+                            <div class="master-details">
+                                <div class="master-avatar" style="background-color: ${getAvatarColor(master.id)}; margin-right: 10px;">
+                                    ${initials}
+                                </div>
+                                <div>
+                                    <div class="font-weight-medium">${master.firstName} ${master.lastName.charAt(0)}.</div>
+                                    <div class="text-muted small">${master.specialtyText}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="master-status status-${master.status}">${getStatusText(master.status)}</span>
+                            <div class="text-muted small mt-1">${scheduleText}</div>
+                        </td>
+                `;
+                
+                // Заполняем дни недели
+                days.forEach(() => {
+                    let time = '';
+                    let status = '';
+                    
+                    switch(master.schedule) {
+                        case 'full':
+                            time = '9:00-18:00';
+                            status = 'success';
+                            break;
+                        case 'shift':
+                            time = Math.random() > 0.5 ? '9:00-15:00' : '15:00-21:00';
+                            status = 'warning';
+                            break;
+                        case 'flexible':
+                            time = 'по договоренности';
+                            status = 'info';
+                            break;
+                        case 'part':
+                            time = '4-6 часов';
+                            status = 'secondary';
+                            break;
+                        default:
+                            time = '9:00-18:00';
+                            status = 'success';
+                    }
+                    
+                    if (master.status === 'vacation' || master.status === 'sick') {
+                        time = '—';
+                        status = 'danger';
+                    }
+                    
+                    html += `<td><span class="badge badge-${status}">${time}</span></td>`;
+                });
+                
+                html += `</tr>`;
+            });
+            
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+                <div class="alert alert-info mt-3">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    <strong>Легенда:</strong>
+                    <span class="badge badge-success ml-2">Полный день</span>
+                    <span class="badge badge-warning ml-2">Сменный график</span>
+                    <span class="badge badge-info ml-2">Гибкий график</span>
+                    <span class="badge badge-secondary ml-2">Частичная занятость</span>
+                    <span class="badge badge-danger ml-2">Отсутствует</span>
+                </div>
+            `;
+            
+            modalContent.innerHTML = html;
+            openModal('scheduleModal');
+        }
+        
+        function printSchedule() {
+            const originalTitle = document.title;
+            document.title = 'График работы мастеров - ' + new Date().toLocaleDateString();
+            
+            window.print();
+            
+            document.title = originalTitle;
+        }
+        
+        function importMasters() {
+            // Простая реализация импорта
+            showNotification('Функция импорта в разработке', 'info');
+        }
+        
+        // Вспомогательные функции
+        function getSpecialtyText(specialty) {
+            const specialties = {
+                'laptops': 'Ноутбуки',
+                'pc': 'Компьютеры',
+                'mobile': 'Смартфоны',
+                'printers': 'Принтеры',
+                'software': 'ПО',
+                'general': 'Универсальный'
+            };
+            return specialties[specialty] || specialty;
+        }
+        
+        function getStatusText(status) {
+            const statuses = {
+                'available': 'Доступен',
+                'busy': 'Занят',
+                'vacation': 'Отпуск',
+                'sick': 'Больничный'
+            };
+            return statuses[status] || status;
+        }
+        
+        function getScheduleText(schedule) {
+            const schedules = {
+                'full': 'Полный день',
+                'shift': 'Сменный',
+                'flexible': 'Гибкий',
+                'part': 'Частичный'
+            };
+            return schedules[schedule] || schedule;
+        }
+        
+        function getScheduleClass(currentOrders) {
+            if (currentOrders === 0) return 'schedule-low';
+            if (currentOrders <= 2) return 'schedule-medium';
+            return 'schedule-full';
+        }
+        
+        function getInitials(firstName, lastName) {
+            return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+        }
+        
+        function getAvatarColor(id) {
+            const colors = [
+                '#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6',
+                '#EC4899', '#06B6D4', '#84CC16', '#F97316', '#6366F1'
+            ];
+            return colors[id % colors.length];
+        }
+        
+        function getRatingStars(rating) {
+            let stars = '';
+            const fullStars = Math.floor(rating);
+            const hasHalfStar = rating % 1 >= 0.5;
+            
+            for (let i = 1; i <= 5; i++) {
+                if (i <= fullStars) {
+                    stars += '<i class="fas fa-star"></i>';
+                } else if (i === fullStars + 1 && hasHalfStar) {
+                    stars += '<i class="fas fa-star-half-alt"></i>';
+                } else {
+                    stars += '<i class="far fa-star"></i>';
+                }
+            }
+            
+            return stars;
+        }
+    </script>
+</body>
+</html>
